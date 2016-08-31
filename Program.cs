@@ -81,7 +81,7 @@ namespace ConsoleApplication
         }
 
         private static void SetType()
-        {
+        {        
             Console.WriteLine("math:m or replace:r");
             var input = Console.ReadLine().ToLower();
             switch (input)
