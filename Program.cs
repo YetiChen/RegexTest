@@ -101,7 +101,6 @@ namespace ConsoleApplication
         private static string SetData()
         {
             Console.WriteLine("double empty line to end");
-            Console.Write(_data);
             var ls = new List<string>();
             string lastLine = null;
             while (true)
