@@ -18,6 +18,9 @@ namespace ConsoleApplication
         private static string _regex;
         private static string _replace;
 
+        private static List<ConsoleColor> _matchColors = new List<ConsoleColor>() { ConsoleColor.Red, ConsoleColor.Green };
+        private static int _matchColorIndex = 0;
+
         public static void Main(string[] args)
         {
             Console.Clear();
@@ -81,7 +84,7 @@ namespace ConsoleApplication
         }
 
         private static void SetType()
-        {        
+        {
             Console.WriteLine("math:m or replace:r");
             var input = Console.ReadLine().ToLower();
             switch (input)
@@ -237,7 +240,15 @@ namespace ConsoleApplication
 
         private static void OutMatched(string data)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
+            Console.ForegroundColor = _matchColors[_matchColorIndex];
+            if (_matchColorIndex < _matchColors.Count - 1)
+            {
+                _matchColorIndex++;
+            }
+            else
+            {
+                _matchColorIndex = 0;
+            }
             Console.Write(data);
         }
     }
