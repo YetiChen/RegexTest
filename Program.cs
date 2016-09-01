@@ -1,62 +1,76 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Text.RegularExpressions;
+using static TestRegex.TestRegex;
 
-namespace ConsoleApplication
+namespace TestRegexConsoleApplication
 {
-
-    public enum RegexType
-    {
-        Match,
-        Replace
-    }
     public class Program
     {
-        private static RegexType _type = RegexType.Match;
-        private static String _data;
-        private static string _regex;
-        private static string _replace;
-
         private static List<ConsoleColor> _matchColors = new List<ConsoleColor>() { ConsoleColor.Red, ConsoleColor.Green };
         private static int _matchColorIndex = 0;
 
         public static void Main(string[] args)
         {
+            var test = new TestRegex.TestRegex();
+            test.OutNormal = OutNormal;
+            test.OutMatched = OutMatched;
             Console.Clear();
             Console.WriteLine("pass h show help");
 
             while (true)
             {
-                ShowConfigure();
+                ShowConfigure(test);
                 Console.Write("command:");
-                var input = Console.ReadLine();
-                switch (input.ToLower())
+                switch (Console.ReadLine().ToLower())
                 {
                     case "t":
-                        SetType();
+                        Console.WriteLine("math:m or replace:r");
+                        test.SetType(Console.ReadLine());
                         Console.Clear();
                         break;
                     case "r":
-                        SetRegex();
+                        test.Pattern = Console.ReadLine();
                         Console.Clear();
                         break;
                     case "d":
-                        _data = SetData();
+                        test.Data = SetData();
                         Console.Clear();
                         break;
                     case "p":
-                        _replace = SetData();
+                        test.Replacement = SetData();
                         Console.Clear();
                         break;
                     case "c":
-                        ShowConfigure();
+                        ShowConfigure(test);
                         Console.Clear();
                         break;
                     case "run":
                         Console.Clear();
-                        ShowConfigure();
-                        Run();
+                        ShowConfigure(test);
+                        Console.WriteLine("result:");
+                        var r = true;
+                        switch (test.Type)
+                        {
+                            case RegexType.Match:
+                                r = r && test.Match();
+                                break;
+                            case RegexType.Replace:
+                                Console.WriteLine("match:");
+                                r = r && test.Match();
+                                Console.WriteLine();
+                                Console.WriteLine("replace:");
+                                r = r && test.Replace();
+                                Console.WriteLine();
+                                break;
+                            default:
+                                r = false;
+                                break;
+                        }
+                        if (!r)
+                        {
+                            Console.WriteLine("error");
+                        }
                         Console.WriteLine();
                         Console.Write("pass any key to continue");
                         Console.ReadKey();
@@ -81,24 +95,6 @@ namespace ConsoleApplication
             Console.WriteLine("pass run start run");
             Console.WriteLine("pass c show configure");
             Console.WriteLine("pass h show help");
-        }
-
-        private static void SetType()
-        {
-            Console.WriteLine("math:m or replace:r");
-            var input = Console.ReadLine().ToLower();
-            switch (input)
-            {
-                case "m":
-                    _type = RegexType.Match;
-                    break;
-                case "r":
-                    _type = RegexType.Replace;
-                    break;
-                default:
-                    SetType();
-                    break;
-            }
         }
 
         private static string SetData()
@@ -128,40 +124,7 @@ namespace ConsoleApplication
             return sb.ToString();
         }
 
-        private static void SetRegex()
-        {
-            var input = Console.ReadLine();
-            _regex = input;
-        }
-
-        private static void Run()
-        {
-            Console.WriteLine("result:");
-            switch (_type)
-            {
-                case RegexType.Match:
-                    if (string.IsNullOrEmpty(_data) || string.IsNullOrEmpty(_regex))
-                    {
-                        Console.WriteLine("error");
-                        return;
-                    }
-
-                    Match();
-                    break;
-                case RegexType.Replace:
-                    if (string.IsNullOrEmpty(_data) || string.IsNullOrEmpty(_regex) || string.IsNullOrEmpty(_replace))
-                    {
-                        Console.WriteLine("error");
-                        return;
-                    }
-                    Replace();
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private static void ShowConfigure()
+        private static void ShowConfigure(TestRegex.TestRegex test)
         {
             var bc = Console.BackgroundColor;
             var fc = Console.ForegroundColor;
@@ -169,64 +132,22 @@ namespace ConsoleApplication
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("type:");
             Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(_type);
+            Console.WriteLine(test.Type);
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("data:");
             Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(_data);
+            Console.WriteLine(test.Data);
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("regex:");
             Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(_regex);
-            if (_type == RegexType.Replace)
+            Console.WriteLine(test.Pattern);
+            if (test.Type == RegexType.Replace)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("replace:");
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine(_replace);
+                Console.WriteLine(test.Replacement);
             }
-
-            Console.BackgroundColor = bc;
-            Console.ForegroundColor = fc;
-        }
-
-        private static void Match()
-        {
-            var bc = Console.BackgroundColor;
-            var fc = Console.ForegroundColor;
-
-            var sIndex = 0;
-            var ms = Regex.Matches(_data, _regex);
-            foreach (Match m in ms)
-            {
-                if (sIndex != m.Index)
-                {
-                    OutNormal(_data.Substring(sIndex, m.Index - sIndex));
-                }
-                OutMatched(_data.Substring(m.Index, m.Length));
-                sIndex = m.Index + m.Length;
-            }
-            if (sIndex != _data.Length)
-            {
-                OutNormal(_data.Substring(sIndex, _data.Length - sIndex));
-            }
-
-            Console.BackgroundColor = bc;
-            Console.ForegroundColor = fc;
-        }
-
-        private static void Replace()
-        {
-            var bc = Console.BackgroundColor;
-            var fc = Console.ForegroundColor;
-
-            Console.WriteLine("match:");
-            Match();
-            Console.WriteLine();
-
-            Console.WriteLine("replace:");
-            OutMatched(Regex.Replace(_data, _regex, _replace));
-            Console.WriteLine();
 
             Console.BackgroundColor = bc;
             Console.ForegroundColor = fc;
@@ -234,12 +155,21 @@ namespace ConsoleApplication
 
         private static void OutNormal(string data)
         {
+            var bc = Console.BackgroundColor;
+            var fc = Console.ForegroundColor;
+
             Console.ForegroundColor = ConsoleColor.White;
             Console.Write(data);
+
+            Console.BackgroundColor = bc;
+            Console.ForegroundColor = fc;
         }
 
         private static void OutMatched(string data)
         {
+            var bc = Console.BackgroundColor;
+            var fc = Console.ForegroundColor;
+
             Console.ForegroundColor = _matchColors[_matchColorIndex];
             if (_matchColorIndex < _matchColors.Count - 1)
             {
@@ -250,6 +180,9 @@ namespace ConsoleApplication
                 _matchColorIndex = 0;
             }
             Console.Write(data);
+
+            Console.BackgroundColor = bc;
+            Console.ForegroundColor = fc;
         }
     }
 }
