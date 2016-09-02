@@ -5,7 +5,7 @@ namespace TestRegex
 {
     public class TestRegex
     {
-        public  enum RegexType
+        public enum RegexType
         {
             Match,
             Replace
@@ -19,6 +19,8 @@ namespace TestRegex
         public Action<string> OutMatched;
 
         public Action<string> OutNormal;
+
+        public Action<int, string> OutGroup;
 
         public TestRegex()
         {
@@ -64,6 +66,26 @@ namespace TestRegex
             if (sIndex != Data.Length)
             {
                 OutNormal(Data.Substring(sIndex, Data.Length - sIndex));
+            }
+            return true;
+        }
+
+        public bool Group()
+        {
+            if (string.IsNullOrEmpty(Data) || string.IsNullOrEmpty(Pattern) || OutGroup == null)
+            {
+                return false;
+            }
+
+            var ms = Regex.Matches(Data, Pattern);
+            foreach (Match m in ms)
+            {
+                var index = 0;
+                foreach (Group group in m.Groups)
+                {
+                    OutGroup(index, group.Value);
+                    index++;
+                }
             }
             return true;
         }

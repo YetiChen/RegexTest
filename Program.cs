@@ -7,7 +7,7 @@ namespace TestRegexConsoleApplication
 {
     public class Program
     {
-        private static List<ConsoleColor> _matchColors = new List<ConsoleColor>() { ConsoleColor.Red, ConsoleColor.Green };
+        private static List<ConsoleColor> _matchColors = new List<ConsoleColor>() { ConsoleColor.Red, ConsoleColor.Cyan };
         private static int _matchColorIndex = 0;
 
         public static void Main(string[] args)
@@ -15,35 +15,36 @@ namespace TestRegexConsoleApplication
             var test = new TestRegex.TestRegex();
             test.OutNormal = OutNormal;
             test.OutMatched = OutMatched;
-            Console.Clear();
-            Console.WriteLine("pass h show help");
+            test.OutGroup = OutGroup;
 
             while (true)
             {
+                Console.Clear();
+                Console.WriteLine("pass h show help");
                 ShowConfigure(test);
                 Console.Write("command:");
                 switch (Console.ReadLine().ToLower())
                 {
                     case "t":
-                        Console.WriteLine("math:m or replace:r");
-                        test.SetType(Console.ReadLine());
                         Console.Clear();
+                        Console.WriteLine("math:m or replace:r");
+                        while (!test.SetType(Console.ReadLine()))
+                        {
+                            Console.Clear();
+                            Console.WriteLine("math:m or replace:r");
+                        }
                         break;
                     case "r":
                         test.Pattern = Console.ReadLine();
-                        Console.Clear();
                         break;
                     case "d":
                         test.Data = SetData();
-                        Console.Clear();
                         break;
                     case "p":
                         test.Replacement = SetData();
-                        Console.Clear();
                         break;
                     case "c":
                         ShowConfigure(test);
-                        Console.Clear();
                         break;
                     case "run":
                         Console.Clear();
@@ -54,10 +55,16 @@ namespace TestRegexConsoleApplication
                         {
                             case RegexType.Match:
                                 r = r && test.Match();
+                                Console.WriteLine();
+                                Console.Write("group:");
+                                r = r && test.Group();
                                 break;
                             case RegexType.Replace:
                                 Console.WriteLine("match:");
                                 r = r && test.Match();
+                                Console.WriteLine();
+                                Console.Write("group:");
+                                r = r && test.Group();
                                 Console.WriteLine();
                                 Console.WriteLine("replace:");
                                 r = r && test.Replace();
@@ -74,11 +81,12 @@ namespace TestRegexConsoleApplication
                         Console.WriteLine();
                         Console.Write("pass any key to continue");
                         Console.ReadKey();
-                        Console.Clear();
                         break;
                     case "h":
                         Console.Clear();
                         GetHelp();
+                        Console.Write("pass any key to continue");
+                        Console.ReadKey();
                         break;
                     default:
                         break;
@@ -179,6 +187,28 @@ namespace TestRegexConsoleApplication
             {
                 _matchColorIndex = 0;
             }
+            Console.Write(data);
+
+            Console.BackgroundColor = bc;
+            Console.ForegroundColor = fc;
+        }
+
+        private static void OutGroup(int index, string data)
+        {
+            var bc = Console.BackgroundColor;
+            var fc = Console.ForegroundColor;
+
+            if (index == 0)
+            {
+                Console.WriteLine();
+            }
+            else
+            {
+                Console.Write("\t");
+            }
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write($"${index}:");
+            Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write(data);
 
             Console.BackgroundColor = bc;
